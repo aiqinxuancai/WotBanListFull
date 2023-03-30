@@ -87,6 +87,10 @@ namespace WotBanListFull.Services
                         expFRAGS += (double)expected["expFrag"] * tank_battles;
                         expDEF += (double)expected["expDef"] * tank_battles;
                         expWIN += 0.01 * (double)expected["expWinRate"] * tank_battles;
+
+
+                        $wn8 = 980 * $rDAMAGEc + 210 * $rDAMAGEc * $rFRAGc + 155 * $rFRAGc * $rSPOTc + 75 * $rDEFc * $rFRAGc + 145 * MIN(1.8, $rWINc);
+
                     }
                     else
                     {
@@ -114,12 +118,11 @@ namespace WotBanListFull.Services
                 double rSPOT = (double)summary["spotted_count_avg"] * (double)summary["battles_count"] / expSPOT;
                 double rFRAG = (double)summary["frags_count_avg"] * (double)summary["battles_count"] / expFRAGS;
                 double rDEF = (double)summary["dropped_capture_points"] / expDEF;
-
                 double rWIN = (double)summary["wins_count"] / expWIN;
+
                 double rWINc = Math.Max(0f, (rWIN - 0.71) / (1 - 0.71));
                 double rDAMAGEc = Math.Max(0f, (rDAMAGE - 0.22) / (1 - 0.22));
                 double rFRAGc = Math.Max(0f, Math.Min(rDAMAGEc + 0.2, (rFRAG - 0.12) / (1 - 0.12)));
-
                 double rSPOTc = Math.Max(0f, Math.Min(rDAMAGEc + 0.1, (rSPOT - 0.38) / (1 - 0.38)));
                 double rDEFc = Math.Max(0f, Math.Min(rDAMAGEc + 0.1, (rDEF - 0.10) / (1 - 0.10)));
 
