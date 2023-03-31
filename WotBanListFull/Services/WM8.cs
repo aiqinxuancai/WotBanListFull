@@ -46,10 +46,18 @@ namespace WotBanListFull.Services
                 //summary = summary[account_id].statistics.all;
 
                 var summary = await WotDataCollectionManager.GetWgBattleDataFull(account_id);
+                if (summary == null)
+                {
+                    return 0;
+                }
                 summary = (JObject)summary["data"];
 
                 //this.api.get("wot/account/tanks", new { fields = "tank_id,statistics.battles", account_id });
                 var tanks = await WotDataCollectionManager.GetWgTanksDataFull(account_id);
+                if (tanks == null)
+                {
+                    return 0;
+                }
                 //ranks = tanks[account_id];
 
                 if (tanks["data"]["data"].Count() == 0)

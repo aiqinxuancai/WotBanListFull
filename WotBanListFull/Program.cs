@@ -23,14 +23,14 @@ namespace WotBanListFull
             //var result = await WotDataCollectionManager.GetZDL("丿泰瑞尔丨");
 
 
-            CalculateCSV.Start();
+            await CalculateCSV.Start();
 
-            var result2 = await WotDataCollectionManager.GetWgBattleDataBase("老紫蜀道山");
+            //var result2 = await WotDataCollectionManager.GetWgBattleDataBase("老紫蜀道山");
 
 
-            string accountId = (string)result2["response"][0]["account_id"];
+            //string accountId = (string)result2["response"][0]["account_id"];
 
-            var da = await WotDataCollectionManager.GetWgUserInfoCreateTime(accountId, "老紫蜀道山");
+            //var da = await WotDataCollectionManager.GetWgUserInfoCreateTime(accountId, "老紫蜀道山");
             
 
 

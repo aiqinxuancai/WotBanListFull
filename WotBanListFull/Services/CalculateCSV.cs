@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
+using Newtonsoft.Json;
 
 namespace WotBanListFull.Services
 {
@@ -52,19 +53,19 @@ namespace WotBanListFull.Services
 
 
         [Name("建号时间")]
-        public string CreateTime { get; set; }
+        public DateTime CreateTime { get; set; }
 
 
         [Name("账户天数")]
-        public string CreateCountDay { get; set; }
+        public int CreateCountDay { get; set; }
 
 
         [Name("战斗场次")]
-        public string BattleCount { get; set; }
+        public int BattleCount { get; set; }
 
 
         [Name("胜率")]
-        public string BattleRate { get; set; }
+        public double BattleRate { get; set; }
 
 
         [Name("军团名称")]
@@ -72,13 +73,16 @@ namespace WotBanListFull.Services
 
 
         [Name("WN8")]
-        public string WN8 { get; set; }
+        public double WN8 { get; set; }
+
+        [Name("战斗力")]
+        public int Power { get; set; }
     }
 
     internal class CalculateCSV
     {
 
-        public static void Start()
+        public static async Task Start()
         {
             Console.WriteLine("Hello World!");
 
@@ -117,10 +121,39 @@ namespace WotBanListFull.Services
                             Time = record.Time,
                             Reason = record.Reason,
                             Name = record.Name,
+
+
                         };
+
+                        var baseInfo = await WotDataCollectionManager.GetWgBattleDataBase(record.Name);
+                        if (baseInfo != null && baseInfo["response"].Count() > 0)
+                        {
+                            banPlayerWrite.BattleRate = (double)baseInfo["response"][0]["account_wins"];
+                            banPlayerWrite.BattleCount = (int)baseInfo["response"][0]["account_battles"];
+                            banPlayerWrite.LegionName = (string)baseInfo["response"][0]["clan_tag"];
+
+                            string accountId = (string)baseInfo["response"][0]["account_id"];
+
+                            var createTime = await WotDataCollectionManager.GetWgUserInfoCreateTime(accountId.ToString(), record.Name);
+                            banPlayerWrite.CreateTime = createTime.createTime;
+                            banPlayerWrite.CreateCountDay = createTime.day;
+
+                            WM8 wn8 = new WM8();
+                            banPlayerWrite.WN8 = await wn8.Calculate(accountId.ToString());
+
+                        }
+
+
+                        banPlayerWrite.Power = await WotDataCollectionManager.GetZDL(record.Name);
 
                         writeList.Add(banPlayerWrite);
 
+                        SaveToCsv("BanList.csv", writeList);
+
+                        Console.WriteLine(JsonConvert.SerializeObject(banPlayerWrite));
+                        //Console.WriteLine("完成");
+
+                        //await Task.Delay(3000);
                     }
 
                     //var recordList = records.ToList();
