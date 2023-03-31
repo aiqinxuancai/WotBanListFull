@@ -37,6 +37,39 @@ namespace WotBanListFull.Services
 
         }
 
+        
+
+        public static async Task<int> GetWgUserInfoCreateTime(string id, string name)
+        {
+            var url = $"https://wotgame.cn/zh-cn/community/accounts/{id}-{name}/?utm_source=global-nav&utm_medium=link&utm_campaign=wot-portal";
+
+            Dictionary<string, string> headers = new Dictionary<string, string>()
+            {
+                 //{ "referer" ,"https://wotgame.cn/zh-cn/community/accounts/"},
+                 { "user-agent" ,"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"},
+                 //{ "x-requested-with" ,"XMLHttpRequest"},
+            };
+
+            var body = await url.WithHeaders(headers).GetStringAsync();
+
+            string pattern = @"""reg_timestamp"":\s*(\d+)";
+
+            Match match = Regex.Match(body, pattern);
+
+            if (match.Success)
+            {
+                int timestamp = int.Parse(match.Groups[1].Value);  // 匹配到的时间戳
+                Console.WriteLine(timestamp);
+                return timestamp;
+            }
+            else
+            {
+                Console.WriteLine("未找到匹配的字符串");
+            }
+            return 0;
+        }
+
+
         public static async Task<JObject> GetWgBattleDataBase(string name)
         {
             var url = $"https://wotgame.cn/zh-cn/community/accounts/search/?name={name}&name_gt=";
@@ -88,6 +121,10 @@ namespace WotBanListFull.Services
             return JObject.Parse(body);
 
         }
+
+
+
+
 
     }
 }

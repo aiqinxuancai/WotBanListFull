@@ -70,16 +70,6 @@ namespace WotBanListFull.Services
                     int tank_id = (int)tank[0];
                     if (expectedTankValues.ContainsKey(tank_id))
                     {
-                        /*
-                             {
-      "IDNum": 1,
-      "expDef": 1.135,
-      "expFrag": 0.98,
-      "expSpot": 1.379,
-      "expDamage": 486.672,
-      "expWinRate": 54.915
-    },
-                         */
                         var expected = expectedTankValues[tank_id];
                         var tank_battles = (double)tank[27];
                         expDAMAGE += (double)expected["expDamage"] * tank_battles;
@@ -89,7 +79,13 @@ namespace WotBanListFull.Services
                         expWIN += 0.01 * (double)expected["expWinRate"] * tank_battles;
 
 
-                        $wn8 = 980 * $rDAMAGEc + 210 * $rDAMAGEc * $rFRAGc + 155 * $rFRAGc * $rSPOTc + 75 * $rDEFc * $rFRAGc + 145 * MIN(1.8, $rWINc);
+                        //calculate_wn8_for_tank((double)tank["damage_dealt"],
+                        //    (double)tank["expSpot"],
+                        //    (double)tank["expFrag"],
+                        //    (double)tank["expDef"],
+                        //    (double)tank["expWinRate", expected);
+
+                        //$wn8 = 980 * $rDAMAGEc + 210 * $rDAMAGEc * $rFRAGc + 155 * $rFRAGc * $rSPOTc + 75 * $rDEFc * $rFRAGc + 145 * MIN(1.8, $rWINc);
 
                     }
                     else
@@ -143,6 +139,48 @@ namespace WotBanListFull.Services
 
             // If WN8 value is already calculated, return it
             return wn8;
+        }
+
+        /// <summary>
+        /// 无法计算，因为官网缺失数据
+        /// </summary>
+        /// <param name="Dmg"></param>
+        /// <param name="Spot"></param>
+        /// <param name="Frag"></param>
+        /// <param name="Def"></param>
+        /// <param name="WinRate"></param>
+        /// <param name="Battles"></param>
+        /// <param name="exp_values"></param>
+        /// <returns></returns>
+        public double CalculateWn8ForTank(double Dmg, double Spot, double Frag, double Def, double WinRate, double Battles, Dictionary<string, double> exp_values)
+        {
+            //Calculate WN8 for single tank with specified WN8 exp_values.
+
+            //step 0 - assigning the variables
+            double expDmg = exp_values["expDamage"];
+            double expSpot = exp_values["expSpot"];
+            double expFrag = exp_values["expFrag"];
+            double expDef = exp_values["expDef"];
+            double expWinRate = exp_values["expWinRate"];
+
+            //step 1 (omitting division by battles as the data was prepared this way before)
+            double rDAMAGE = Dmg / expDmg;
+            double rSPOT = Spot / expSpot;
+            double rFRAG = Frag / expFrag;
+            double rDEF = Def / expDef;
+            double rWIN = WinRate / expWinRate;
+
+            //step 2
+            double rWINc = Math.Max(0, (rWIN - 0.71) / (1 - 0.71));
+            double rDAMAGEc = Math.Max(0, (rDAMAGE - 0.22) / (1 - 0.22));
+            double rFRAGc = Math.Max(0, Math.Min(rDAMAGEc + 0.2, (rFRAG - 0.12) / (1 - 0.12)));
+            double rSPOTc = Math.Max(0, Math.Min(rDAMAGEc + 0.1, (rSPOT - 0.38) / (1 - 0.38)));
+            double rDEFc = Math.Max(0, Math.Min(rDAMAGEc + 0.1, (rDEF - 0.10) / (1 - 0.10)));
+
+            //step 3
+            double WN8 = 980 * rDAMAGEc + 210 * rDAMAGEc * rFRAGc + 155 * rFRAGc * rSPOTc + 75 * rDEFc * rFRAGc + 145 * Math.Min(1.8, rWINc);
+
+            return WN8;
         }
 
         private Dictionary<int, JToken> GetExpectedTankValues()
