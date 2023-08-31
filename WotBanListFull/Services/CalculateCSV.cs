@@ -82,18 +82,14 @@ namespace WotBanListFull.Services
     internal class CalculateCSV
     {
 
-        public static async Task Start()
+        public static async Task Start(string csvFilePath)
         {
-            Console.WriteLine("Hello World!");
-
-
-
-            int fullPrice = 0;
+            Console.WriteLine(@$"使用CSV文件：{csvFilePath}");
 
             int fullCount = 0;
             Dictionary<string, int> dict = new Dictionary<string, int>();
 
-            using (var reader = new StreamReader("封禁名单-2023-03-29.csv"))
+            using (var reader = new StreamReader(csvFilePath))
             {
                 List<string> badRecord = new List<string>();
                 var config = new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -128,7 +124,7 @@ namespace WotBanListFull.Services
                         var baseInfo = await WotDataCollectionManager.GetWgBattleDataBase(record.Name);
                         if (baseInfo != null && baseInfo["response"].Count() > 0)
                         {
-                            banPlayerWrite.BattleRate = (double)baseInfo["response"][0]["account_wins"];
+                            banPlayerWrite.BattleRate = Math.Round((double)baseInfo["response"][0]["account_wins"], 2);
                             banPlayerWrite.BattleCount = (int)baseInfo["response"][0]["account_battles"];
                             banPlayerWrite.LegionName = (string)baseInfo["response"][0]["clan_tag"];
 
@@ -151,32 +147,21 @@ namespace WotBanListFull.Services
                         SaveToCsv("BanList.csv", writeList);
 
                         Console.WriteLine(JsonConvert.SerializeObject(banPlayerWrite));
-                        //Console.WriteLine("完成");
+                        Console.WriteLine($"{fullCount}/{recordList.Count}");
 
-                        //await Task.Delay(3000);
+                        //await Task.Delay(3000); 
                     }
 
-                    //var recordList = records.ToList();
-
-
-
-
-                    SaveToCsv("BanList.csv", writeList);
-
+                    SaveToCsv(Path.GetFileNameWithoutExtension(csvFilePath) + "-Full.csv", writeList);
                 }
-
-                
             }
 
-            var newDict = dict.OrderBy(a => a.Key);
-            foreach (KeyValuePair<string, int> line in newDict)
-            {
-                Console.WriteLine($"{line.Key}   {line.Value}");
-            }
-
-            Console.WriteLine($"{fullCount} {fullPrice}");
-
-
+            //var newDict = dict.OrderBy(a => a.Key);
+            //foreach (KeyValuePair<string, int> line in newDict)
+            //{
+            //    Console.WriteLine($"{line.Key}   {line.Value}");
+            //}
+            //Console.WriteLine($"{fullCount}");
         }
 
         public static void SaveToCsv(string filePath, List<BanPlayerWrite> dataList)

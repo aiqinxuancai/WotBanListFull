@@ -15,9 +15,6 @@ namespace WotBanListFull.Services
 {
     internal class WotDataCollectionManager
     {
-
-
-
         public static async Task<int> GetZDL(string name)
         {
             try

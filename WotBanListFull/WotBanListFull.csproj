@@ -5,6 +5,9 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	<IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+	<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+	<PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
